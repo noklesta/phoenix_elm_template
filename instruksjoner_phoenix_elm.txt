@@ -1,0 +1,27 @@
+mix phoenix.new myapp
+cd myapp
+mix ecto.create
+rm brunch-config.js
+cp ../phoenix_elm_template/.gitignore .
+cp ../phoenix_elm_template/package.json myapp/
+cp ../phoenix_elm_template/webpack.config.js myapp/
+yarn
+
+rm web/static/css/app.css
+cp ../phoenix_elm_template/app.scss web/static/css/
+cp ../phoenix_elm_template/app.js web/static/js
+cp ../phoenix_elm_template/index.html.eex web/templates/page
+cp ../phoenix_elm_template/app.html.eex web/templates/layout/
+cd priv/static/css
+ln -s ../fonts .
+cd ../../..
+
+mkdir web/elm
+cd web/elm
+elm-package install elm-lang/html
+
+touch Main.elm
+Legg inn minimalt innhold i Main.elm
+
+Rediger config i dev.exs:
+    watchers: [npm: ["start", cd: Path.expand("../", __DIR__)]]
