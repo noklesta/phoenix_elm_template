@@ -42,8 +42,16 @@ var commonConfig = {
         }
       },
       {
-        test: /\.(eot|ttf|woff|woff2|svg)$/,
-        loader: 'file-loader'
+        test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&mimetype=application/font-woff&name=[name].[ext]'
+      },
+      {
+        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&mimetype=application/octet-stream&name=[name].[ext]'
+      },
+      {
+        test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file?name=[name].[ext]'
+      },
+      {
+        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&mimetype=image/svg+xml&name=[name].[ext]'
       }
     ]
   },
@@ -134,22 +142,22 @@ if ( TARGET_ENV === 'production' ) {
       new CopyWebpackPlugin([
         {
           from: 'web/static/assets/images',
-          to:   'priv/static/images'
+          to:   'images'
         },
         {
           from: 'web/static/assets/favicon.ico',
-          to: 'priv/static/favicon.ico'
+          to: 'favicon.ico'
         },
         {
           from: 'web/static/assets/robots.txt',
-          to: 'priv/static/robots.txt'
+          to: 'robots.txt'
         }
       ]),
 
       new webpack.optimize.OccurenceOrderPlugin(),
 
       // extract CSS into a separate file
-      new ExtractTextPlugin( 'priv/static/css/app.css', { allChunks: true } ),
+      new ExtractTextPlugin( 'css/app.css', { allChunks: true } ),
 
       // minify & mangle JS/CSS
       new webpack.optimize.UglifyJsPlugin({
