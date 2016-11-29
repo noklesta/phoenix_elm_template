@@ -34,8 +34,6 @@ In router.ex, add this plug in pipeline :browser:
     plug :put_layout, false
 ```
 
-In terminal 1:
-mix phoenix.server
+In terminal 1: `mix phoenix.server`
 
-In terminal 2:
-npm start
+In terminal 2: `npm start`
