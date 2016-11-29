@@ -1,22 +1,37 @@
-// We need to bring in the ExtractTextPlugin.  This will allow us to pull the
-// CSS out of our bundle and output it to its own file.
-const ExtractTextPlugin = require("extract-text-webpack-plugin")
-// We'll add a const for where our elm source files live
-const elmSource = __dirname + '/web/elm'
+var path              = require( 'path' );
+var webpack           = require( 'webpack' );
+var merge             = require( 'webpack-merge' );
+var HtmlWebpackPlugin = require( 'html-webpack-plugin' );
+var autoprefixer      = require( 'autoprefixer' );
+var ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
+var CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 
-module.exports = {
-  entry: [
-    "./web/static/css/app.scss",
-    "./web/static/js/app.js",
-    // We need to add our elm app as an entry point
-    "./web/elm/Main.elm"
-  ],
+// We'll add a const for where our elm source files live
+const elmSource = __dirname + '/web/static/elm'
+
+console.log( 'WEBPACK GO!');
+
+// detemine build env
+var TARGET_ENV = process.env.npm_lifecycle_event === 'build' ? 'production' : 'development';
+
+// common webpack config
+var commonConfig = {
+
   output: {
     path: "./priv/static",
     filename: "js/app.js"
   },
 
+  resolve: {
+    modulesDirectories: [
+      "node_modules",
+      __dirname + "/web/static/js"
+    ],
+    extensions: ['', '.scss', '.css', '.js', '.elm']
+  },
+
   module: {
+    noParse: /\.elm$/,
     loaders: [
       {
         test: /\.js$/,
@@ -27,49 +42,122 @@ module.exports = {
         }
       },
       {
-        test: /\.css$/,
-        loader: ExtractTextPlugin.extract("style", "css")
-      },
-      {
-        test: /\.scss$/,
-        loader: ExtractTextPlugin.extract(
-          "style",
-          "css!sass?includePaths[]=" + __dirname + "/node_modules"
-        )
-      },
-      {
-        test: /\.(woff|woff2)(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&mimetype=application/font-woff&name=fonts/[name].[ext]'
-      },
-      {
-        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&mimetype=application/octet-stream&name=fonts/[name].[ext]'
-      },
-      {
-        test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file'
-      },
-      {
-        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url?limit=10000&mimetype=image/svg+xml'
-      },
-      // We'll add our elm loader
-      {
-        test: /\.elm$/,
-        exclude: [/elm-stuff/, /node_modules/],
-        loader: 'elm-hot!elm-webpack?cwd=' + elmSource
+        test: /\.(eot|ttf|woff|woff2|svg)$/,
+        loader: 'file-loader'
       }
-    ],
-    // And we don't want to parse Elm files since they won't be using require or define calls
-    noParse: [/\.elm$/]
+    ]
   },
 
   plugins: [
-    new ExtractTextPlugin("css/app.css")
+    new HtmlWebpackPlugin({
+      template: 'web/static/index.html',
+      inject:   'body',
+      filename: 'index.html'
+    })
   ],
 
-  resolve: {
-    modulesDirectories: [
-      "node_modules",
-      __dirname + "/web/static/js"
+  postcss: [ autoprefixer( { browsers: ['last 2 versions'] } ) ],
+
+}
+
+// additional webpack settings for local env (when invoked by 'npm start')
+if ( TARGET_ENV === 'development' ) {
+  console.log( 'Serving locally...');
+
+  module.exports = merge( commonConfig, {
+
+    entry: [
+      'webpack-dev-server/client?http://localhost:8080',
+      "./web/static/css/app.scss",
+      "./web/static/js/app.js",
+      "./web/static/elm/Main.elm"
     ],
-    // We need webpack to know it can resolve elm files
-    extensions: ['', '.scss', '.css', '.js', '.elm']
-  }
+
+    devServer: {
+      inline:   true,
+      progress: true
+    },
+
+    module: {
+      loaders: [
+        {
+          test:    /\.elm$/,
+          exclude: [/elm-stuff/, /node_modules/],
+          loader:  'elm-hot!elm-webpack?verbose=true&warn=true&debug=true&cwd=' + elmSource
+        },
+        {
+          test: /\.(css|scss)$/,
+          loaders: [
+            'style-loader',
+            'css-loader',
+            'postcss-loader',
+            'sass-loader'
+          ]
+        }
+      ]
+    }
+
+  });
+}
+
+// additional webpack settings for prod env (when invoked via 'npm run build')
+if ( TARGET_ENV === 'production' ) {
+  console.log( 'Building for prod...');
+
+  module.exports = merge( commonConfig, {
+
+    entry: [
+      "./web/static/css/app.scss",
+      "./web/static/js/app.js",
+      "./web/static/elm/Main.elm"
+    ],
+
+    module: {
+      loaders: [
+        {
+          test:    /\.elm$/,
+          exclude: [/elm-stuff/, /node_modules/],
+          loader:  'elm-webpack'
+        },
+        {
+          test: /\.(css|scss)$/,
+          loader: ExtractTextPlugin.extract( 'style-loader', [
+            'css-loader',
+            'postcss-loader',
+            'sass-loader'
+          ])
+        }
+      ]
+    },
+
+    plugins: [
+      new CopyWebpackPlugin([
+        {
+          from: 'web/static/assets/images',
+          to:   'priv/static/images'
+        },
+        {
+          from: 'web/static/assets/favicon.ico',
+          to: 'priv/static/favicon.ico'
+        },
+        {
+          from: 'web/static/assets/robots.txt',
+          to: 'priv/static/robots.txt'
+        }
+      ]),
+
+      new webpack.optimize.OccurenceOrderPlugin(),
+
+      // extract CSS into a separate file
+      new ExtractTextPlugin( 'priv/static/css/app.css', { allChunks: true } ),
+
+      // minify & mangle JS/CSS
+      new webpack.optimize.UglifyJsPlugin({
+          minimize:   true,
+          compressor: { warnings: false }
+          // mangle:  true
+      })
+    ]
+
+  });
 }

@@ -3,25 +3,31 @@ cd myapp
 mix ecto.create
 rm brunch-config.js
 cp ../phoenix_elm_template/.gitignore .
-cp ../phoenix_elm_template/package.json myapp/
-cp ../phoenix_elm_template/webpack.config.js myapp/
+cp ../phoenix_elm_template/package.json .
+cp ../phoenix_elm_template/webpack.config.js .
 yarn
 
 rm web/static/css/app.css
 cp ../phoenix_elm_template/app.scss web/static/css/
 cp ../phoenix_elm_template/app.js web/static/js
 cp ../phoenix_elm_template/index.html.eex web/templates/page
-cp ../phoenix_elm_template/app.html.eex web/templates/layout/
-cd priv/static/css
-ln -s ../fonts .
-cd ../../..
+rm web/templates/layout/app.html.eex
 
-mkdir web/elm
-cd web/elm
+mkdir web/static/elm
+cd web/static/elm
 elm-package install elm-lang/html
+echo module Main exposing (..)\\n\\nimport Html exposing (..)\\n\\nmain : Html msg\\nmain = div [] [ text \"testing\" ] > Main.elm
+cd ..
+cp ../../../phoenix_elm_template/index.html .
 
-touch Main.elm
-Legg inn minimalt innhold i Main.elm
 
-Rediger config i dev.exs:
-    watchers: [npm: ["start", cd: Path.expand("../", __DIR__)]]
+Kommenter ut watchers og live_reload i dev.exs
+
+I router.ex, legg inn denne pluggen i pipeline :browser:
+    plug :put_layout, false
+
+I terminal 1:
+mix phoenix.server
+
+I terminal 2:
+npm start
