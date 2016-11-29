@@ -2,6 +2,7 @@
 Instructions for setting up a Phoenix app with an Elm frontend
 
 ```
+git clone https://github.com/noklesta/phoenix_elm_template.git
 mix phoenix.new myapp
 cd myapp
 mix ecto.create
