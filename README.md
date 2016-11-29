@@ -22,7 +22,7 @@ rm web/templates/layout/app.html.eex
 mkdir web/static/elm
 cd web/static/elm
 elm-package install elm-lang/html
-echo module Main exposing (..)\\n\\nimport Html exposing (..)\\n\\nmain : Html msg\\nmain = div [] [ text \"testing\" ] > Main.elm
+cp ../../../../phoenix_elm_template/Main.elm .
 cd ..
 cp ../../../phoenix_elm_template/index.html .
 ```
