@@ -83,7 +83,14 @@ if ( TARGET_ENV === 'development' ) {
 
     devServer: {
       inline:   true,
-      progress: true
+      progress: true,
+      proxy: {
+      '/api': {
+        target: 'http://localhost:4000',
+        secure: false,
+        changeOrigin: true
+      }
+    }
     },
 
     module: {
