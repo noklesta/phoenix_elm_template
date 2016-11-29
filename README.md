@@ -1,6 +1,7 @@
 # phoenix_elm_template
 Instructions for setting up a Phoenix app with an Elm frontend
 
+```
 mix phoenix.new myapp
 cd myapp
 mix ecto.create
@@ -22,15 +23,15 @@ elm-package install elm-lang/html
 echo module Main exposing (..)\\n\\nimport Html exposing (..)\\n\\nmain : Html msg\\nmain = div [] [ text \"testing\" ] > Main.elm
 cd ..
 cp ../../../phoenix_elm_template/index.html .
+```
 
+Comment out watchers and live_reload in dev.exs
 
-Kommenter ut watchers og live_reload i dev.exs
-
-I router.ex, legg inn denne pluggen i pipeline :browser:
+In router.ex, add this plug in pipeline :browser:
     plug :put_layout, false
 
-I terminal 1:
+In terminal 1:
 mix phoenix.server
 
-I terminal 2:
+In terminal 2:
 npm start
