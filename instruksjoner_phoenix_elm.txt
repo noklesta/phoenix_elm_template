@@ -21,13 +21,13 @@ cd ..
 cp ../../../phoenix_elm_template/index.html .
 
 
-Kommenter ut watchers og live_reload i dev.exs
+Comment out watchers and live_reload in dev.exs
 
-I router.ex, legg inn denne pluggen i pipeline :browser:
+In router.ex, add this plug in pipeline :browser:
     plug :put_layout, false
 
-I terminal 1:
+In terminal 1:
 mix phoenix.server
 
-I terminal 2:
+In terminal 2:
 npm start
