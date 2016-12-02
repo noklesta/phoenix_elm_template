@@ -85,7 +85,7 @@ if ( TARGET_ENV === 'development' ) {
       inline:   true,
       progress: true,
       proxy: {
-      '/api': {
+      '!/**/*.{css,js,hot-update.json}': {
         target: 'http://localhost:4000',
         secure: false,
         changeOrigin: true
